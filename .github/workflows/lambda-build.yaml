@@ -146,43 +146,27 @@ jobs:
         working-directory: ${{ matrix.lambda.folder }}
         run: |
           ( cd dist && zip -q -r "../${{ matrix.lambda.name }}.zip" * )
-      # - name: Package runtime libraries
-      #   run: |
-      #     cd ${{ matrix.lambda.folder }} 
-          
-      #     mkdir nodejs
-      #     cp package.json package-lock.json nodejs 
-          
-      #     NODE_ENV=production npm ci --prefix nodejs 
-          
-      #     prj_name=$( cat package.json | jq -r '.name' )
-      #     zip -q -r "${prj_name}-liblayer.zip" nodejs
-          
       
-  #               echo " - Enter into project folder"
-  #               cd ${prj_dir} 
-  #               pwd 
-
-  #               echo ""
-  #               echo " - Download dependencies"
-  #               npm ci 
-
-  #               echo ""
-  #               echo " - Build project"
-  #               npm run --if-present lint
-  #               npm run build 
-
-  #               echo ""
-  #               echo " - Package project code"
-  #               (cd 
-
-  #               echo ""
-  #               echo " - Package runtime libraries"
-  #               mkdir nodejs 
-  #               cp package.json package-lock.json nodejs 
-  #               NODE_ENV=production npm ci --prefix nodejs 
-  #               zip -q -r "${zips_folder}/${prj_name}-liblayer.zip" nodejs 
+      - name: Package runtime libraries
+        working-directory: ${{ matrix.lambda.folder }}
+        run: |
+          mkdir nodejs
+          cp package.json package-lock.json nodejs 
+          
+          NODE_ENV=production npm ci --prefix nodejs 
+          zip -q -r "${{ matrix.lambda.name }}-liblayer.zip" nodejs
       
+      - name: Upload lambda Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: lambda-zip-${{ matrix.lambda.name }}-${{ env.source_tag }}
+          path: "${{ matrix.lambda.folder }}/${{ matrix.lambda.name }}.zip"
+
+      - name: Upload lib layer Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: liblayer-zip-${{ matrix.lambda.name }}-${{ env.source_tag }}
+          path: "${{ matrix.lambda.folder }}/${{ matrix.lambda.name }}-liblayer.zip"
 
   # build-all-projects:
   #   name: Lint, build, and archive all node projects
