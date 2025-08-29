@@ -99,10 +99,10 @@ jobs:
               has_dockerfile="false"
             fi
             
-            if ( [ "$first" = "false"] ) then
+            if ( [ "$first" = "false" ] ) then
               PACKAGES="${PACKAGES},"
             fi
-            PACKAGES="${PACKAGES} {\"name\":\"$( echo $f | basename )\", \"folder\":\"$f\", \"has_dockerfile\":\"$has_dockerfile\"}"
+            PACKAGES="${PACKAGES} {\"name\":\"$( basename $f )\", \"folder\":\"$f\", \"has_dockerfile\":\"$has_dockerfile\"}"
             
             first="true"
           done
