@@ -87,11 +87,25 @@ jobs:
       - id: extract
         name: List node lambdas folders
         run: |
-          PACKAGES=$( 
-              find lambdas -type f -name "package.json" -exec dirname {} \; \
-                | jq -cnR '[inputs]' \
-                | jq -c 'map( { "name": (.| sub(".*/";"")), "folder": .})' \
-              )
+          PACKAGES="["
+
+          FOLDERS=$( find lambdas -type f -name "package.json" -exec dirname {} \; )
+          first="true"
+          for f in $FOLDERS
+            if ( [ -e "$f/Dockerfile" ] ) then
+              has_dockerfile="true"
+            else
+              has_dockerfile="false"
+            fi
+            
+            if ( [ "$first" = "false"] ) then
+              PACKAGES="${PACKAGES},"
+            fi
+            PACKAGES="${PACKAGES} {\"name\":\"$( echo $f | basename )\", \"folder\":\"$f\", \"has_dockerfile\":\"$has_dockerfile\"}"
+            
+            first="true"
+          do
+            
           echo "Node lambdas"
           echo "$PACKAGES"
           echo "lambdas=$PACKAGES" >> $GITHUB_OUTPUT
