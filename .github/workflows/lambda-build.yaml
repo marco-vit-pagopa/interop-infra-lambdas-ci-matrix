@@ -45,7 +45,7 @@ jobs:
       - id: extract
         name: List Dockerfile directories
         run: |
-          PACKAGES=$(find lambdas -type f -path "*/Dockerfile" | awk -F'/' '{print $2}' | jq -R -s -c 'split("\n")[:-1]')
+          PACKAGES=$(find lambdas -type f -name "Dockerfile" -exec dirname {} \; | jq -n -R '[inputs]' )
           echo "Docker projects"
           echo "$PACKAGES"
           echo "projects=$PACKAGES" >> $GITHUB_OUTPUT
