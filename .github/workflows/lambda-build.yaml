@@ -127,16 +127,57 @@ jobs:
     env: 
       source_tag: ${{ needs.extract_commitid_or_tag_name.outputs.commitid_or_tag_name  }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
-      - name: Gracefully exit if Dockerfile is present
-        if: steps.check_dockerfile_presence.outputs.has_dockerfile == 'true'
-        run: exit 78
       - name: Announce
         run: |
-          echo "Start build docker image for project ${{ matrix.project.folder }} source version ${{ env.source_tag }}"
+          echo "Start node build for project in ${{ matrix.project.folder }} source version ${{ env.source_tag }}"
+      - name: Checkout
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+      - name: Install dependencies 
+        run: |
+          ( cd ${{ matrix.project.folder }} && npm ci )
+      - name: Build
+        run: |
+          cd ${{ matrix.project.folder }} 
+          npm run build
+      - name: Package project code
+        run: |
+          cd ${{ matrix.project.folder }}/dist 
+          zip -q -r "../${prj_name}.zip" *
+      - name: Package runtime libraries
+        run: |
+          cd ${{ matrix.project.folder }} 
+          
+          mkdir nodejs
+          cp package.json package-lock.json nodejs 
+          
+          NODE_ENV=production npm ci --prefix nodejs 
+          
+          zip -q -r "${prj_name}-liblayer.zip" nodejs
+          
+      
+  #               echo " - Enter into project folder"
+  #               cd ${prj_dir} 
+  #               pwd 
 
+  #               echo ""
+  #               echo " - Download dependencies"
+  #               npm ci 
 
+  #               echo ""
+  #               echo " - Build project"
+  #               npm run --if-present lint
+  #               npm run build 
+
+  #               echo ""
+  #               echo " - Package project code"
+  #               (cd 
+
+  #               echo ""
+  #               echo " - Package runtime libraries"
+  #               mkdir nodejs 
+  #               cp package.json package-lock.json nodejs 
+  #               NODE_ENV=production npm ci --prefix nodejs 
+  #               zip -q -r "${zips_folder}/${prj_name}-liblayer.zip" nodejs 
       
 
   # build-all-projects:
