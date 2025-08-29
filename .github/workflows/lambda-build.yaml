@@ -63,7 +63,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        project: ${{ fromJson(needs.list_docker_projects.outputs.projects) }}
+        lambda: ${{ fromJson(needs.list_docker_projects.outputs.lambdas) }}
     env: 
       source_tag: ${{ needs.extract_commitid_or_tag_name.outputs.commitid_or_tag_name  }}
     steps:
@@ -99,7 +99,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        project: ${{ fromJson(needs.list_docker_projects.outputs.projects) }}
+        lambda: ${{ fromJson(needs.list_docker_projects.outputs.lambdas) }}
     env: 
       source_tag: ${{ needs.extract_commitid_or_tag_name.outputs.commitid_or_tag_name  }}
     steps:
