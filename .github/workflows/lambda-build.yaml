@@ -59,7 +59,7 @@ jobs:
           echo "lambdas=$PACKAGES" >> $GITHUB_OUTPUT
   
   docker_build_and_push:
-    name: ${{ matrix.lambda.name }}
+    name: Docker ${{ matrix.lambda.name }}
     needs: [ list_docker_lambdas, extract_commitid_or_tag_name ]
     runs-on: ubuntu-latest
     permissions:
@@ -97,7 +97,7 @@ jobs:
           echo "lambdas=$PACKAGES" >> $GITHUB_OUTPUT
   
   node_build_and_upload_artifact:
-    name: ${{ matrix.lambda.name }}
+    name: Node ${{ matrix.lambda.name }}
     needs: [ list_node_lambdas, extract_commitid_or_tag_name ]
     runs-on: ubuntu-latest
     permissions:
@@ -119,6 +119,7 @@ jobs:
           else
             has_dockerfile="false"
           fi
+          echo "Dockerfile founded? ${has_dockerfile}"
           echo "has_dockerfile=$has_dockerfile" >> $GITHUB_OUTPUT
       - name: Announce
         run: |
