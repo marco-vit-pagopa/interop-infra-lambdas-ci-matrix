@@ -123,7 +123,7 @@ jobs:
           echo "has_dockerfile=$has_dockerfile" >> $GITHUB_OUTPUT
       - name: Gracefully exit if Dockerfile is present
         if: ${{ steps.check_dockerfile_presence.outputs.has_dockerfile }}
-        run: exit 79
+        run: exit 78
       - name: Announce
         run: |
           echo "Start build docker image for project ${{ matrix.project.folder }} source version ${{ env.source_tag }}"
