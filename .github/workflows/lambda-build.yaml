@@ -99,12 +99,14 @@ jobs:
               has_dockerfile="false"
             fi
             
-            if ( [ "$first" = "false" ] ) then
-              PACKAGES="${PACKAGES},"
-            fi
-            PACKAGES="${PACKAGES} {\"name\":\"$( basename $f )\", \"folder\":\"$f\", \"has_dockerfile\":\"$has_dockerfile\"}"
-            
-            first="true"
+            if ( [ "$has_dockerfile" == "false" ] ) then
+              if ( [ "$first" = "false" ] ) then
+                PACKAGES="${PACKAGES},"
+              fi
+
+              PACKAGES="${PACKAGES} {\"name\":\"$( basename $f )\", \"folder\":\"$f\", \"has_dockerfile\":\"$has_dockerfile\"}"
+              first="false"
+            else            
           done
 
           echo "Node lambdas"
