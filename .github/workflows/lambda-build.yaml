@@ -122,7 +122,7 @@ jobs:
           echo "Dockerfile founded? ${has_dockerfile}"
           echo "has_dockerfile=$has_dockerfile" >> $GITHUB_OUTPUT
       - name: Gracefully exit if Dockerfile is present
-        if: steps.check_dockerfile_presence.outputs.has_dockerfile
+        if: steps.check_dockerfile_presence.outputs.has_dockerfile == "true"
         run: exit 78
       - name: Announce
         run: |
