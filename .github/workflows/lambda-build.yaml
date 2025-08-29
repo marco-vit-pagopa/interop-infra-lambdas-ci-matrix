@@ -45,13 +45,17 @@ jobs:
       - id: extract
         name: List Dockerfile directories
         run: |
-          PACKAGES=$(find lambdas -type f -name "Dockerfile" -exec dirname {} \; | jq -cnR '[inputs]' )
+          PACKAGES=$( 
+              find lambdas -type f -name "Dockerfile" -exec dirname {} \; \
+                | jq -cnR '[inputs]' \
+                | jq -c 'map( { "name": (.| sub(".*/";"")), "folder": .})' \
+              )
           echo "Docker projects"
           echo "$PACKAGES"
           echo "projects=$PACKAGES" >> $GITHUB_OUTPUT
   
   docker_build_and_push:
-    name: ${{ matrix.project }}
+    name: ${{ matrix.project.name }}
     needs: [ list_docker_projects, extract_commitid_or_tag_name ]
     runs-on: ubuntu-latest
     permissions:
@@ -64,7 +68,7 @@ jobs:
       source_tag: ${{ needs.extract_commitid_or_tag_name.outputs.commitid_or_tag_name  }}
     steps:
       - name: Announce
-        run: echo "Start build docker image for project ${{ matrix.project }} source version ${{ env.source_tag }}"
+        run: echo "Start build docker image for project ${{ matrix.project.folder }} source version ${{ env.source_tag }}"
       
 
   # build-all-projects:
