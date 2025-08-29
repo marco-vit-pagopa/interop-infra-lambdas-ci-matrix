@@ -92,6 +92,7 @@ jobs:
           FOLDERS=$( find lambdas -type f -name "package.json" -exec dirname {} \; )
           first="true"
           for f in $FOLDERS
+          do
             if ( [ -e "$f/Dockerfile" ] ) then
               has_dockerfile="true"
             else
@@ -104,8 +105,8 @@ jobs:
             PACKAGES="${PACKAGES} {\"name\":\"$( echo $f | basename )\", \"folder\":\"$f\", \"has_dockerfile\":\"$has_dockerfile\"}"
             
             first="true"
-          do
-            
+          done
+
           echo "Node lambdas"
           echo "$PACKAGES"
           echo "lambdas=$PACKAGES" >> $GITHUB_OUTPUT
