@@ -20,6 +20,34 @@ env:
   NODE_VERSION: '20'
 
 jobs:
+  list_docker_projects:
+    runs-on: ubuntu-latest
+    outputs:
+      docker_projects: ${{ steps.extract.outputs.projects }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+      - id: extract
+        name: List Dockerfile directories
+        run: |
+          PACKAGES=$(find packages -type f -path "*/Dockerfile" | awk -F'/' '{print $2}' | jq -R -s -c 'split("\n")[:-1]')
+          echo "projects=$PACKAGES" >> $GITHUB_OUTPUT
+  
+  build:
+    name: ${{ matrix.package }}
+    needs: [f list_docker_projects ]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJson(needs.list_docker_projects.outputs.packages) }}
+    steps:
+      - name: Announce
+        run: echo "Start build docker image for project ${{ matrix.package }} "
+      
+
   extract-ref:
     runs-on: ubuntu-latest
     outputs:
