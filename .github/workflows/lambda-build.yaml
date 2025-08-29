@@ -55,7 +55,7 @@ jobs:
           echo "lambdas=$PACKAGES" >> $GITHUB_OUTPUT
   
   docker_build_and_push:
-    name: ${{ matrix.project.name }}
+    name: ${{ matrix.lambda.name }}
     needs: [ list_docker_lambdas, extract_commitid_or_tag_name ]
     runs-on: ubuntu-latest
     permissions:
@@ -82,7 +82,7 @@ jobs:
         name: List node lambdas folders
         run: |
           PACKAGES=$( 
-              find lambdas -type f -name "project.json" -exec dirname {} \; \
+              find lambdas -type f -name "package.json" -exec dirname {} \; \
                 | jq -cnR '[inputs]' \
                 | jq -c 'map( { "name": (.| sub(".*/";"")), "folder": .})' \
               )
@@ -91,7 +91,7 @@ jobs:
           echo "lambdas=$PACKAGES" >> $GITHUB_OUTPUT
   
   node_build_and_upload_artifact:
-    name: ${{ matrix.project.name }}
+    name: ${{ matrix.lambda.name }}
     needs: [ list_node_lambdas, extract_commitid_or_tag_name ]
     runs-on: ubuntu-latest
     permissions:
