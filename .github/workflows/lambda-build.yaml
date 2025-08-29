@@ -134,18 +134,19 @@ jobs:
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
       - name: Install dependencies 
         run: |
-          ( cd ${{ matrix.project.folder }} && npm ci )
+          cd ${{ matrix.lambda.folder }}
+          npm ci 
       - name: Build
         run: |
-          cd ${{ matrix.project.folder }} 
+          cd ${{ matrix.lambda.folder }} 
           npm run build
-      - name: Package project code
+      - name: Package lambda code
         run: |
-          cd ${{ matrix.project.folder }}/dist 
+          cd ${{ matrix.lambda.folder }}/dist 
           zip -q -r "../${prj_name}.zip" *
       - name: Package runtime libraries
         run: |
-          cd ${{ matrix.project.folder }} 
+          cd ${{ matrix.lambda.folder }} 
           
           mkdir nodejs
           cp package.json package-lock.json nodejs 
