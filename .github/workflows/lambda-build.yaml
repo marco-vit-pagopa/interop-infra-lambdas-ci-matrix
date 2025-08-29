@@ -106,7 +106,7 @@ jobs:
 
               PACKAGES="${PACKAGES} {\"name\":\"$( basename $f )\", \"folder\":\"$f\", \"has_dockerfile\":\"$has_dockerfile\"}"
               first="false"
-            else            
+            fi         
           done
 
           echo "Node lambdas"
