@@ -114,7 +114,7 @@ jobs:
       - id: check_dockerfile_presence
         name: Check Dockerfile presence
         run: |
-          if ( [ -e "${{ matrix.project.folder }}/Dockerfile" ] ) then
+          if ( [ -e "${{ matrix.lambda.folder }}/Dockerfile" ] ) then
             has_dockerfile="true"
           else
             has_dockerfile="false"
