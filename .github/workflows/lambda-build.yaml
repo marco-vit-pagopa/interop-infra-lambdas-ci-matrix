@@ -38,7 +38,7 @@ jobs:
   list_docker_projects:
     runs-on: ubuntu-latest
     outputs:
-      docker_projects: ${{ steps.extract.outputs.projects }}
+      projects: ${{ steps.extract.outputs.projects }}
     steps:
       - name: Checkout
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
@@ -46,6 +46,8 @@ jobs:
         name: List Dockerfile directories
         run: |
           PACKAGES=$(find lambdas -type f -path "*/Dockerfile" | awk -F'/' '{print $2}' | jq -R -s -c 'split("\n")[:-1]')
+          echo "Docker projects"
+          echo "$PACKAGES"
           echo "projects=$PACKAGES" >> $GITHUB_OUTPUT
   
   docker_build_and_push:
@@ -57,7 +59,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: ${{ fromJson(needs.list_docker_projects.outputs.packages) }}
+        project: ${{ fromJson(needs.list_docker_projects.outputs.projects) }}
     env: 
       source_tag: ${{ needs.extract_commitid_or_tag_name.outputs.commitid_or_tag_name  }}
     steps:
