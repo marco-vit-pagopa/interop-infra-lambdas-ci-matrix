@@ -134,10 +134,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
       
-      - name: Read project name from package.json
-        id: extract_pkg_name
-        run: echo "pkg_name=$( cat ../package.json | jq -r '.name' )" >> $GITHUB_OUTPUT
-      
       - name: Install dependencies 
         working-directory: ${{ matrix.lambda.folder }}
         run: npm ci 
@@ -149,7 +145,7 @@ jobs:
       - name: Package lambda code
         working-directory: ${{ matrix.lambda.folder }}
         run: |
-          ( cd dist && zip -q -r "../${{ steps.extract_pkg_name.outputs.pkg_name }}.zip" * )
+          ( cd dist && zip -q -r "../${{ matrix.lambda.name }}.zip" * )
       # - name: Package runtime libraries
       #   run: |
       #     cd ${{ matrix.lambda.folder }} 
