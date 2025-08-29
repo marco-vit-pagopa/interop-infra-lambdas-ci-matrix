@@ -108,6 +108,7 @@ jobs:
               first="false"
             fi         
           done
+          PACKAGES="${PACKAGES}]"
 
           echo "Node lambdas"
           echo "$PACKAGES" | jq '.'
