@@ -143,6 +143,7 @@ jobs:
       - name: Package lambda code
         run: |
           cd ${{ matrix.lambda.folder }}/dist 
+          prj_name=$( cat ../package.json | jq -r '.name' )
           zip -q -r "../${prj_name}.zip" *
       - name: Package runtime libraries
         run: |
@@ -153,6 +154,7 @@ jobs:
           
           NODE_ENV=production npm ci --prefix nodejs 
           
+          prj_name=$( cat package.json | jq -r '.name' )
           zip -q -r "${prj_name}-liblayer.zip" nodejs
           
       
