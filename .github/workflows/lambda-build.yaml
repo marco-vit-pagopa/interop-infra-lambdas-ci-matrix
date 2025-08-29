@@ -130,32 +130,37 @@ jobs:
       - name: Announce
         run: |
           echo "Start node build for project in ${{ matrix.project.folder }} source version ${{ env.source_tag }}"
+      
       - name: Checkout
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+      
+      - name: Read project name from package.json
+        id: extract_pkg_name
+        run: echo "pkg_name=$( cat ../package.json | jq -r '.name' )" >> $GITHUB_OUTPUT
+      
       - name: Install dependencies 
-        run: |
-          cd ${{ matrix.lambda.folder }}
-          npm ci 
+        working-directory: ${{ matrix.lambda.folder }}
+        run: npm ci 
+      
       - name: Build
-        run: |
-          cd ${{ matrix.lambda.folder }} 
-          npm run build
+        working-directory: ${{ matrix.lambda.folder }}
+        run: npm run build
+      
       - name: Package lambda code
+        working-directory: ${{ matrix.lambda.folder }}
         run: |
-          cd ${{ matrix.lambda.folder }}/dist 
-          prj_name=$( cat ../package.json | jq -r '.name' )
-          zip -q -r "../${prj_name}.zip" *
-      - name: Package runtime libraries
-        run: |
-          cd ${{ matrix.lambda.folder }} 
+          ( cd dist && zip -q -r "../${{ steps.extract_pkg_name.outputs.pkg_name }}.zip" * )
+      # - name: Package runtime libraries
+      #   run: |
+      #     cd ${{ matrix.lambda.folder }} 
           
-          mkdir nodejs
-          cp package.json package-lock.json nodejs 
+      #     mkdir nodejs
+      #     cp package.json package-lock.json nodejs 
           
-          NODE_ENV=production npm ci --prefix nodejs 
+      #     NODE_ENV=production npm ci --prefix nodejs 
           
-          prj_name=$( cat package.json | jq -r '.name' )
-          zip -q -r "${prj_name}-liblayer.zip" nodejs
+      #     prj_name=$( cat package.json | jq -r '.name' )
+      #     zip -q -r "${prj_name}-liblayer.zip" nodejs
           
       
   #               echo " - Enter into project folder"
