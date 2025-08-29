@@ -20,6 +20,8 @@ env:
   NODE_VERSION: '20'
 
 jobs:
+  
+  ### COMMONS ###
   extract_commitid_or_tag_name:
     runs-on: ubuntu-latest
     outputs:
@@ -35,6 +37,8 @@ jobs:
             echo "commitid_or_tag_name=${{github.sha}}" >> $GITHUB_OUTPUT
           fi
   
+  
+  ###### DOCKER LAMBDAS JOBS ###
   list_docker_lambdas:
     runs-on: ubuntu-latest
     outputs:
@@ -70,7 +74,9 @@ jobs:
       - name: Announce
         run: echo "Start build docker image for project ${{ matrix.project.folder }} source version ${{ env.source_tag }}"
 
-  
+
+
+  ###### NODES LAMBDAS JOBS ###
   list_node_lambdas:
     runs-on: ubuntu-latest
     outputs:
