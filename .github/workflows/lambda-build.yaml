@@ -51,7 +51,7 @@ jobs:
           echo "projects=$PACKAGES" >> $GITHUB_OUTPUT
   
   docker_build_and_push:
-    name: ${{ matrix.package }}
+    name: ${{ matrix.project }}
     needs: [ list_docker_projects, extract_commitid_or_tag_name ]
     runs-on: ubuntu-latest
     permissions:
@@ -64,7 +64,7 @@ jobs:
       source_tag: ${{ needs.extract_commitid_or_tag_name.outputs.commitid_or_tag_name  }}
     steps:
       - name: Announce
-        run: echo "Start build docker image for project ${{ matrix.package }} source version ${{ env.source_tag }}"
+        run: echo "Start build docker image for project ${{ matrix.project }} source version ${{ env.source_tag }}"
       
 
   # build-all-projects:
