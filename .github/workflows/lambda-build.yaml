@@ -55,7 +55,7 @@ jobs:
                 | jq -c 'map( { "name": (.| sub(".*/";"")), "folder": .})' \
               )
           echo "Docker lambdas"
-          echo "$PACKAGES"
+          echo "$PACKAGES"  | jq '.'
           echo "lambdas=$PACKAGES" >> $GITHUB_OUTPUT
   
   docker_build_and_push:
@@ -108,13 +108,14 @@ jobs:
           done
 
           echo "Node lambdas"
-          echo "$PACKAGES"
+          echo "$PACKAGES" | jq '.'
           echo "lambdas=$PACKAGES" >> $GITHUB_OUTPUT
   
   node_build_and_upload_artifact:
     name: Node ${{ matrix.lambda.name }}
     needs: [ list_node_lambdas, extract_commitid_or_tag_name ]
     runs-on: ubuntu-latest
+    if: matrix.lambda.has_dockerfile == 'false' 
     permissions:
       contents: read
     strategy:
@@ -126,23 +127,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
-      - id: check_dockerfile_presence
-        name: Check Dockerfile presence
-        run: |
-          if ( [ -e "${{ matrix.lambda.folder }}/Dockerfile" ] ) then
-            has_dockerfile="true"
-          else
-            has_dockerfile="false"
-          fi
-          echo "Dockerfile founded? ${has_dockerfile}"
-          echo "has_dockerfile=$has_dockerfile" >> $GITHUB_OUTPUT
       - name: Gracefully exit if Dockerfile is present
         if: steps.check_dockerfile_presence.outputs.has_dockerfile == 'true'
         run: exit 78
       - name: Announce
         run: |
           echo "Start build docker image for project ${{ matrix.project.folder }} source version ${{ env.source_tag }}"
-          echo "Has Dockerfile? ${{steps.check_dockerfile_presence.outputs.has_dockerfile}}"
+
 
       
 
