@@ -188,6 +188,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          ls -R released_files/*
           gh -R ${{ github.repository }} release create -d \
              --verify-tag ${{github.ref_name}} \
              -t ${{ env.source_tag }} \
