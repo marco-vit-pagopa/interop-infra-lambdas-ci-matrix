@@ -177,7 +177,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ extract_commitid_or_tag_name, node_build_and_upload_artifact ]
     env:
-      source_tag: ${{ needs.extract-ref.outputs.commitid_or_tag_name }}
+      source_tag: ${{ needs.extract_commitid_or_tag_name.outputs.commitid_or_tag_name }}
     steps:
       - name: Download a single artifact
         uses: actions/download-artifact@v4
