@@ -82,56 +82,8 @@ jobs:
       - name: Announce
         run: echo "Start build docker image for project ${{ matrix.project.folder }} source version ${{ env.source_tag }}"
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@062b18b96a7aff071d4dc91bc00c4c1a7945b076 # v2
-
-      - name: Normalize ref name
-        id: norm_ref
-        run: |
-          set -euo pipefail
-
-          NORM_REF="$(echo ${{ github.ref_name }} | sed -e 's/\//-/g')"
-          echo "NORM_REF=$NORM_REF" >> $GITHUB_ENV
-
-      - name: (branch) Docker metadata
-        id: meta_branch
-        if: ${{ github.ref_type == 'branch' }}
-        uses: docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f
-        with:
-          images: ${{ steps.login-ecr.outputs.registry }}/interop-infra-lambda-${{ matrix.lambda.name }}
-          flavor: |
-            latest=false
-            prefix=
-            suffix=
-          tags: |
-            type=raw,value=${{ env.NORM_REF }}
-
-      - name: (tag) Docker metadata
-        id: meta_tag
-        if: ${{ github.ref_type == 'tag' }}
-        uses: docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f
-        with:
-          images: ${{ steps.login-ecr.outputs.registry }}/interop-infra-lambda-${{ matrix.lambda.name }}
-          flavor: |
-            latest=false
-            prefix=
-            suffix=
-          tags: |
-            type=ref,event=tag
-
-      - name: Build and push Docker image
-        id: build_push
-        uses: docker/build-push-action@55146d969b0dff1a5c12630229609757af5b1081
-        with:
-          context: .
-          file: ${{ matrix.lambda.folder }}/Dockerfile
-          build-args: |
-            NODE_REGISTRY=${{ vars.NODE_REGISTRY }}
-          push: true
-          tags: ${{ github.ref_type == 'branch' && steps.meta_branch.outputs.tags || steps.meta_tag.outputs.tags }}
-          labels: ${{ github.ref_type == 'branch' && steps.meta_branch.outputs.labels || steps.meta_tag.outputs.labels }}
-
+      ### ADD HERE THE DOCKER RELATED BUILDING (and pushing) STEPS
+      
 
   ######                               NODE LAMBDAS RELATED JOBS                                ###
   #################################################################################################
