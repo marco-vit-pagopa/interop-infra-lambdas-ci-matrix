@@ -182,7 +182,7 @@ jobs:
       - name: Download a single artifact
         uses: actions/download-artifact@v4
         with:
-          pattern: ${{ env.source_tag }}
+          pattern: ${{ env.source_tag }}-*
           merge-multiple: true
           path: released_files
       - name: Create draft release
