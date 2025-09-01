@@ -172,6 +172,8 @@ jobs:
   create_draft_release:
     if: github.ref_type == 'tag'
     name: Create Draft Release
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     needs: [ extract_commitid_or_tag_name, node_build_and_upload_artifact ]
     env:
