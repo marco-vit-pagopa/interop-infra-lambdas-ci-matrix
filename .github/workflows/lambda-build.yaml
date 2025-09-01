@@ -20,8 +20,9 @@ env:
   NODE_VERSION: '20'
 
 jobs:
-  
-  ### COMMONS ###
+
+  ######                           COMMONS JOBS USED FOR ALL LAMBDAS                            ###
+  #################################################################################################
   extract_commitid_or_tag_name:
     runs-on: ubuntu-latest
     outputs:
@@ -39,9 +40,9 @@ jobs:
             echo "${{ github.ref_type }} commit id is ${{github.sha}}"
             echo "commitid_or_tag_name=${{github.sha}}" >> $GITHUB_OUTPUT
           fi
-  
-  
-  ###### DOCKER LAMBDAS JOBS ###
+
+  ######                              DOCKER LAMBDAS RELATED JOBS                               ###
+  #################################################################################################
   list_docker_lambdas:
     runs-on: ubuntu-latest
     outputs:
@@ -53,7 +54,7 @@ jobs:
         name: List Dockerfile lambdas folders
         run: |
           set -euo pipefail
-          PACKAGES=$( 
+          PACKAGES=$(
               find lambdas -type f -name "Dockerfile" -exec dirname {} \; \
                 | jq -cnR '[inputs]' \
                 | jq -c 'map( { "name": (.| sub(".*/";"")), "folder": .})' \
@@ -61,7 +62,7 @@ jobs:
           echo "Docker lambdas"
           echo "$PACKAGES"  | jq '.'
           echo "lambdas=$PACKAGES" >> $GITHUB_OUTPUT
-  
+
   docker_build_and_push:
     name: Docker ${{ matrix.lambda.name }}
     needs: [ list_docker_lambdas, extract_commitid_or_tag_name ]
@@ -72,15 +73,15 @@ jobs:
       fail-fast: false
       matrix:
         lambda: ${{ fromJson(needs.list_docker_lambdas.outputs.lambdas) }}
-    env: 
+    env:
       source_tag: ${{ needs.extract_commitid_or_tag_name.outputs.commitid_or_tag_name  }}
     steps:
       - name: Checkout
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
-      
+
       - name: Announce
         run: echo "Start build docker image for project ${{ matrix.project.folder }} source version ${{ env.source_tag }}"
-      
+
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@062b18b96a7aff071d4dc91bc00c4c1a7945b076 # v2
@@ -132,7 +133,8 @@ jobs:
           labels: ${{ github.ref_type == 'branch' && steps.meta_branch.outputs.labels || steps.meta_tag.outputs.labels }}
 
 
-  ###### NODES LAMBDAS JOBS ###
+  ######                               NODE LAMBDAS RELATED JOBS                                ###
+  #################################################################################################
   list_node_lambdas:
     runs-on: ubuntu-latest
     outputs:
@@ -155,7 +157,7 @@ jobs:
             else
               has_dockerfile="false"
             fi
-            
+
             if ( [ "$has_dockerfile" == "false" ] ) then
               if ( [ "$first" = "false" ] ) then
                 PACKAGES="${PACKAGES},"
@@ -163,14 +165,14 @@ jobs:
 
               PACKAGES="${PACKAGES} {\"name\":\"$( basename $f )\", \"folder\":\"$f\", \"has_dockerfile\":\"$has_dockerfile\"}"
               first="false"
-            fi         
+            fi
           done
           PACKAGES="${PACKAGES}]"
 
           echo "Node lambdas"
           echo "$PACKAGES" | jq '.'
           echo "lambdas=$PACKAGES" >> $GITHUB_OUTPUT
-  
+
   node_build_and_upload_artifact:
     name: Node ${{ matrix.lambda.name }}
     needs: [ list_node_lambdas, extract_commitid_or_tag_name ]
@@ -181,39 +183,44 @@ jobs:
       fail-fast: false
       matrix:
         lambda: ${{ fromJson(needs.list_node_lambdas.outputs.lambdas) }}
-    env: 
+    env:
       source_tag: ${{ needs.extract_commitid_or_tag_name.outputs.commitid_or_tag_name  }}
     steps:
       - name: Announce
         run: |
           echo "Start node build for project in ${{ matrix.project.folder }} source version ${{ env.source_tag }}"
-      
+
       - name: Checkout
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
-      
-      - name: Install dependencies 
+
+      - name: Set up Node.js
+        uses: actions/setup-node@1a4442cacd436585916779262731d5b162bc6ec7 # v3
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
         working-directory: ${{ matrix.lambda.folder }}
-        run: npm ci 
-      
+        run: npm ci
+
       - name: Build
         working-directory: ${{ matrix.lambda.folder }}
         run: npm run build
-      
+
       - name: Package lambda code
         working-directory: ${{ matrix.lambda.folder }}
         run: |
           ( cd dist && zip -q -r "../${{ matrix.lambda.name }}.zip" * )
-      
+
       - name: Package runtime libraries
         working-directory: ${{ matrix.lambda.folder }}
         run: |
           set -euo pipefail
           mkdir nodejs
-          cp package.json package-lock.json nodejs 
-          
-          NODE_ENV=production npm ci --prefix nodejs 
+          cp package.json package-lock.json nodejs
+
+          NODE_ENV=production npm ci --prefix nodejs
           zip -q -r "${{ matrix.lambda.name }}-liblayer.zip" nodejs
-      
+
       - name: Upload lambda Artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
@@ -226,7 +233,7 @@ jobs:
           name: ${{ env.source_tag }}-${{ matrix.lambda.name }}-liblayer.zip
           path: ${{ matrix.lambda.folder }}/${{ matrix.lambda.name }}-liblayer.zip
 
-  
+
   create_draft_release:
     if: github.ref_type == 'tag'
     name: Create Draft Release
@@ -252,4 +259,3 @@ jobs:
              --verify-tag ${{github.ref_name}} \
              -t ${{ env.source_tag }} \
              released_files/*
-
