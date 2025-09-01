@@ -30,6 +30,7 @@ jobs:
       - id: extract
         name: Compute tag name or commit id
         run: |
+          set -euo pipefail
           if ( [ "tag" == "${{ github.ref_type }}" ] ) then
             tag_name=$( basename "${{github.ref_name}}" )
             echo "${{ github.ref_type }} name is ${tag_name}"
@@ -51,6 +52,7 @@ jobs:
       - id: extract
         name: List Dockerfile lambdas folders
         run: |
+          set -euo pipefail
           PACKAGES=$( 
               find lambdas -type f -name "Dockerfile" -exec dirname {} \; \
                 | jq -cnR '[inputs]' \
@@ -73,9 +75,61 @@ jobs:
     env: 
       source_tag: ${{ needs.extract_commitid_or_tag_name.outputs.commitid_or_tag_name  }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+      
       - name: Announce
         run: echo "Start build docker image for project ${{ matrix.project.folder }} source version ${{ env.source_tag }}"
+      
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@062b18b96a7aff071d4dc91bc00c4c1a7945b076 # v2
 
+      - name: Normalize ref name
+        id: norm_ref
+        run: |
+          set -euo pipefail
+
+          NORM_REF="$(echo ${{ github.ref_name }} | sed -e 's/\//-/g')"
+          echo "NORM_REF=$NORM_REF" >> $GITHUB_ENV
+
+      - name: (branch) Docker metadata
+        id: meta_branch
+        if: ${{ github.ref_type == 'branch' }}
+        uses: docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f
+        with:
+          images: ${{ steps.login-ecr.outputs.registry }}/interop-infra-lambda-${{ matrix.lambda.name }}
+          flavor: |
+            latest=false
+            prefix=
+            suffix=
+          tags: |
+            type=raw,value=${{ env.NORM_REF }}
+
+      - name: (tag) Docker metadata
+        id: meta_tag
+        if: ${{ github.ref_type == 'tag' }}
+        uses: docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f
+        with:
+          images: ${{ steps.login-ecr.outputs.registry }}/interop-infra-lambda-${{ matrix.lambda.name }}
+          flavor: |
+            latest=false
+            prefix=
+            suffix=
+          tags: |
+            type=ref,event=tag
+
+      - name: Build and push Docker image
+        id: build_push
+        uses: docker/build-push-action@55146d969b0dff1a5c12630229609757af5b1081
+        with:
+          context: .
+          file: ${{ matrix.lambda.folder }}/Dockerfile
+          build-args: |
+            NODE_REGISTRY=${{ vars.NODE_REGISTRY }}
+          push: true
+          tags: ${{ github.ref_type == 'branch' && steps.meta_branch.outputs.tags || steps.meta_tag.outputs.tags }}
+          labels: ${{ github.ref_type == 'branch' && steps.meta_branch.outputs.labels || steps.meta_tag.outputs.labels }}
 
 
   ###### NODES LAMBDAS JOBS ###
@@ -89,6 +143,7 @@ jobs:
       - id: extract
         name: List node lambdas folders
         run: |
+          set -euo pipefail
           PACKAGES="["
 
           FOLDERS=$( find lambdas -type f -name "package.json" -exec dirname {} \; )
@@ -152,6 +207,7 @@ jobs:
       - name: Package runtime libraries
         working-directory: ${{ matrix.lambda.folder }}
         run: |
+          set -euo pipefail
           mkdir nodejs
           cp package.json package-lock.json nodejs 
           
