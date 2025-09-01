@@ -30,7 +30,7 @@ jobs:
       - id: extract
         name: Compute tag name or commit id
         run: |
-          if ( [ "tag" == "${{ github.ref_type }}"] ) then
+          if ( [ "tag" == "${{ github.ref_type }}" ] ) then
             tag_name=$( basename "${{github.ref_name}}" )
             echo "${{ github.ref_type }} name is ${ tag_name }"
             echo "commitid_or_tag_name=${tag_name}" >> $GITHUB_OUTPUT
