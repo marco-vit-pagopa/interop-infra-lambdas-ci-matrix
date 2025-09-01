@@ -165,8 +165,8 @@ jobs:
       - name: Upload lib layer Artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: ${{ env.source_tag }}-${{ matrix.lambda.name }}-liblayer.zip"
-          path: "${{ matrix.lambda.folder }}/${{ matrix.lambda.name }}-liblayer.zip"
+          name: ${{ env.source_tag }}-${{ matrix.lambda.name }}-liblayer.zip
+          path: ${{ matrix.lambda.folder }}/${{ matrix.lambda.name }}-liblayer.zip
 
   
   create_draft_release:
