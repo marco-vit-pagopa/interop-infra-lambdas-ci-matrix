@@ -145,10 +145,9 @@ jobs:
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@1a4442cacd436585916779262731d5b162bc6ec7 # v3
-        working-directory: ${{ matrix.lambda.folder }}
+        uses: actions/setup-node@3235b876344d2a9aa001b8d1453c930bba69e610 # v3.9.1
         with:
-          node-version-file: ./package.json
+          node-version-file: ${{ matrix.lambda.folder }}/package.json
 
       - name: Install dependencies
         working-directory: ${{ matrix.lambda.folder }}
