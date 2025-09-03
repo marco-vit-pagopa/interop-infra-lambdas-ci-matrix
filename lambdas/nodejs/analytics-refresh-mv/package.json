@@ -4,7 +4,7 @@
   "description": "Code for lambda that refresh analytics materialized views",
   "main": "index.js",
   "engine" {
-    "node": "22"
+    "node": "24"
   },
   "scripts": {
     "test": "echo \"NO TEST IMPLEMENTED\" && exit 0",
