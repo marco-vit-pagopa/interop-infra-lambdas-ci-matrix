@@ -144,13 +144,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      - name: Setup Node Engine
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version-file: ${{ matrix.lambda.folder }}/package.json
 
       - name: Install dependencies
         working-directory: ${{ matrix.lambda.folder }}
-        run: pwd && npm ci
+        run: npm ci
 
       - name: Build
         working-directory: ${{ matrix.lambda.folder }}
