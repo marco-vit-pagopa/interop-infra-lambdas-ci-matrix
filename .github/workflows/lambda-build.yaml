@@ -150,7 +150,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: ${{ matrix.lambda.folder }}
-        run: npm ci
+        run: pwd && npm ci
 
       - name: Build
         working-directory: ${{ matrix.lambda.folder }}
